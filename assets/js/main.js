@@ -14,45 +14,75 @@ if (yearEl) {
 
 // Smooth scroll fallback for browsers that ignore CSS property
 const navLinks = document.querySelectorAll('nav a[href^="#"]');
+const navEl = document.querySelector(".nav");
+const navContainer = navEl?.querySelector("nav");
+const navOffset = () => (navEl ? navEl.getBoundingClientRect().height : 0);
+const isMobileNav = () => window.innerWidth <= 720;
+
 navLinks.forEach((link) => {
   link.addEventListener("click", (e) => {
     const targetId = link.getAttribute("href");
     const target = document.querySelector(targetId);
     if (target) {
       e.preventDefault();
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
+      const top = target.getBoundingClientRect().top + window.scrollY - navOffset() - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+      const id = targetId.replace("#", "");
+      if (id) setActive(id, { fromScroll: false });
     }
   });
 });
 
 // Highlight active section in nav on scroll
-const sections = document.querySelectorAll("section[id]");
-const setActive = (id) => {
+const sections = Array.from(document.querySelectorAll("section[id]"));
+let activeId = null;
+const setActive = (id, { fromScroll = false } = {}) => {
+  if (id === activeId) return;
+  activeId = id;
   navLinks.forEach((l) => {
-    l.classList.toggle("active", l.getAttribute("href") === `#${id}`);
+    const isActive = l.getAttribute("href") === `#${id}`;
+    l.classList.toggle("active", isActive);
+    if (isActive && isMobileNav() && navContainer) {
+      const behavior = fromScroll ? "smooth" : "smooth";
+      l.scrollIntoView({ behavior, inline: "center", block: "nearest" });
+    }
   });
 };
 
-const observer = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
-      const id = entry.target.getAttribute("id");
-      if (id) setActive(id);
-    });
-  },
-  {
-    rootMargin: "-30% 0px -40% 0px",
-    threshold: 0.25,
-  }
-);
+const updateActiveByScroll = () => {
+  if (!sections.length) return;
 
-sections.forEach((section) => observer.observe(section));
+  const scrollPos = window.scrollY + navOffset() + 8;
+  let currentId = sections[0].id;
+
+  sections.forEach((section) => {
+    if (scrollPos >= section.offsetTop - 1) currentId = section.id;
+  });
+
+  const nearBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight - 4;
+  if (nearBottom) {
+    currentId = sections[sections.length - 1].id;
+  }
+
+  setActive(currentId, { fromScroll: true });
+};
+
+let ticking = false;
+window.addEventListener("scroll", () => {
+  if (ticking) return;
+  window.requestAnimationFrame(() => {
+    updateActiveByScroll();
+    ticking = false;
+  });
+  ticking = true;
+});
+
+window.addEventListener("resize", () => {
+  updateActiveByScroll();
+});
 
 // Default highlight on page load
-if (sections.length) {
-  setActive(sections[0].getAttribute("id"));
-}
+updateActiveByScroll();
 
 // Subtle parallax on hero visual
 const orb = document.querySelector(".orb");
