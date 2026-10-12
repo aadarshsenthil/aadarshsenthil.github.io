@@ -6,6 +6,58 @@ AOS.init({
   easing: "ease-out-quad",
 });
 
+// Render an ambient, autonomous neural network behind the page content.
+const neuralNetwork = document.getElementById("neural-network");
+const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+if (neuralNetwork && window.particlesJS && !prefersReducedMotion) {
+  window.particlesJS("neural-network", {
+    particles: {
+      number: {
+        value: 145,
+        density: { enable: true, value_area: 700 },
+      },
+      color: { value: "#60e0ff" },
+      shape: { type: "circle" },
+      opacity: {
+        value: 0.65,
+        random: true,
+        anim: { enable: true, speed: 0.5, opacity_min: 0.25, sync: false },
+      },
+      size: {
+        value: 2.8,
+        random: true,
+        anim: { enable: true, speed: 1, size_min: 1, sync: false },
+      },
+      line_linked: {
+        enable: true,
+        distance: 145,
+        color: "#60e0ff",
+        opacity: 0.38,
+        width: 1.1,
+      },
+      move: {
+        enable: true,
+        speed: 0.35,
+        direction: "none",
+        random: true,
+        straight: false,
+        out_mode: "bounce",
+        attract: { enable: true, rotateX: 900, rotateY: 1800 },
+      },
+    },
+    interactivity: {
+      detect_on: "canvas",
+      events: {
+        onhover: { enable: false, mode: "repulse" },
+        onclick: { enable: false, mode: "push" },
+        resize: true,
+      },
+    },
+    retina_detect: true,
+  });
+}
+
 // Set current year in footer
 const yearEl = document.getElementById("year");
 if (yearEl) {
