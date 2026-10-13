@@ -595,4 +595,11 @@ ul {
   .hero__content {
     order: 1;
   }
+
+  .project-img {
+    max-width: 100%;
+    height: auto;
+    aspect-ratio: auto;
+    object-fit: contain;
+  }
 }
